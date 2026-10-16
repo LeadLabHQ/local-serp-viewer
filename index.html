@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Local SERP Viewer: See Google Results the Way Your Town Sees Them — The Lead Lab</title>
+<meta name="description" content="A free tool from The Lead Lab: enter a town and a search, and open Google's results exactly as a customer standing in that town sees them — set with Google's own location parameter. A viewer, not a rank tracker.">
+<link rel="canonical" href="https://leadlabhq.com/tools/local-serp-viewer/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Local SERP Viewer",
+  "url": "https://leadlabhq.com/tools/local-serp-viewer/",
+  "applicationCategory": "BusinessApplication",
+  "operatingSystem": "Any (browser)",
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "description": "A client-side tool that builds a Google search link with the search location set to a town the visitor enters, using Google's own uule location parameter, so the visitor can see Google's results as a searcher in that town sees them. The place name is resolved with OpenStreetMap's Nominatim service; the search itself runs on Google, in a new tab.",
+  "isPartOf": { "@id": "https://leadlabhq.com/#website" },
+  "publisher": { "@id": "https://leadlabhq.com/#organization" }
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "What does the Local SERP Viewer do?",
+      "acceptedAnswer": { "@type": "Answer", "text": "It builds a Google search link with the search location set to the town you enter — using Google's own location parameter (called uule, the same one Google Ads uses to target places) — and opens it on Google in a new tab. You see the results page as a customer searching from that town sees it, instead of the results for wherever you happen to be sitting." } },
+    { "@type": "Question", "name": "Is this my ranking?",
+      "acceptedAnswer": { "@type": "Answer", "text": "No. This is a viewer, not a rank tracker and not a measurement. It sets the search location to the town; Google still weighs the exact spot, the time, and — if you are signed in — your history. Two checks an hour apart can differ. Use it to see what a customer in that town is looking at, not as a position report." } },
+    { "@type": "Question", "name": "Why do the results differ from the same search on my phone?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Your phone searches from where you physically are, and Google localizes hard — a search from across town can return a different list. This tool sets the location to the town you name, so you see that town's version. If you are signed in to Google, your own history can still shade what you see; for the cleanest view, open the link in a private window." } },
+    { "@type": "Question", "name": "Is anything I enter sent or stored?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Your search words are never sent by us — they go to Google only when you click the link, like any Google search. The place name you type is sent to OpenStreetMap's free Nominatim service to resolve it to a town and state; that one lookup cannot be done locally. We store nothing, and the only thing we count is an anonymous tally that the tool was opened and used — no values, no cookies, nothing that identifies you." } },
+    { "@type": "Question", "name": "How do I know Google used the location I picked?",
+      "acceptedAnswer": { "@type": "Answer", "text": "Scroll to the bottom of Google's results page. Google prints the location it used for the search there — it should name your town. If it names somewhere else, Google mapped the town to a nearby place in its own directory; try the town name with the state instead of a ZIP, since ZIP areas often span several towns." } }
+  ]
+}
+</script>
+<style>
+  :root{
+    --green:#015224;
+    --green-dark:#003d1a;
+    --gold:#FEC046;
+    --ink:#14211a;
+    --muted:#5a6a60;
+    --paper:#fbfaf6;
+    --card:#ffffff;
+    --line:#e3e0d4;
+    --bad:#a4261a;
+    --warn:#8a6d00;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%;scroll-behavior:smooth}
+  body{font-family:Georgia,"Times New Roman",serif;background:var(--paper);color:var(--ink);line-height:1.6;font-size:18px}
+  .sans{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  header{background:var(--green);color:#fff;padding:16px 20px}
+  header .brand{max-width:760px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+  header .brand .name{font-size:20px;font-weight:bold;letter-spacing:.4px}
+  header .brand .name span{color:var(--gold)}
+  header .brand .name a{color:#fff;text-decoration:none}
+  nav.sitenav{display:flex;gap:2px;flex-wrap:wrap}
+  nav.sitenav a{color:#fff;text-decoration:none;font-size:14px;padding:5px 10px;border-radius:999px;white-space:nowrap}
+  nav.sitenav a:hover{color:var(--gold);background:rgba(255,255,255,.08)}
+  main{max-width:760px;margin:0 auto;padding:0 20px 48px}
+  .kicker{margin-top:32px;font-size:13px;letter-spacing:2.2px;text-transform:uppercase;color:var(--green);font-weight:bold}
+  h1{font-size:38px;line-height:1.15;margin:10px 0 12px;color:var(--green-dark)}
+  .finding{font-size:21px;line-height:1.55;margin-bottom:22px}
+  .finding strong{color:var(--green-dark)}
+  p{margin-bottom:18px}
+  h2{font-size:26px;color:var(--green-dark);margin:40px 0 12px;line-height:1.25}
+  a{color:var(--green)}
+  .privacy{background:#fff8e8;border:1px solid var(--gold);border-left:6px solid var(--gold);border-radius:0 10px 10px 0;padding:16px 20px;margin:22px 0;font-size:16.5px}
+  .privacy p{margin-bottom:0}
+  .tool{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:22px;margin:24px 0}
+  .tool label{display:block;font-weight:bold;color:var(--green-dark);margin-bottom:8px;font-size:17px}
+  .field{margin-bottom:18px}
+  .field input,.field select{width:100%;padding:12px 14px;border:1.5px solid var(--line);border-radius:10px;font-size:17px;color:var(--ink);background:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .field input:focus,.field select:focus{outline:2px solid var(--gold);border-color:var(--gold)}
+  .hint{font-size:14.5px;color:var(--muted);margin-top:6px}
+  .runbtn{display:inline-block;margin-top:6px;background:var(--green);color:#fff;font-weight:bold;font-size:17px;padding:12px 26px;border:none;border-radius:999px;cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .runbtn:hover{background:var(--green-dark)}
+  .runbtn:disabled{opacity:.55;cursor:wait}
+  .status{margin-top:16px;font-size:16px}
+  .status.err{color:var(--bad);font-weight:bold}
+  .choices{margin-top:16px}
+  .choices p{margin-bottom:8px;font-weight:bold;color:var(--green-dark)}
+  .choicebtn{display:block;width:100%;text-align:left;margin:8px 0;background:#f4f2e9;border:1.5px solid var(--line);border-radius:10px;padding:12px 16px;font-size:16.5px;color:var(--ink);cursor:pointer;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  .choicebtn:hover{border-color:var(--gold);background:#fff8e8}
+  .viewbox{margin-top:22px;background:var(--green);color:#fff;border-radius:10px;padding:20px}
+  .viewbox .lbl{font-size:13px;letter-spacing:1.6px;text-transform:uppercase;color:var(--gold);font-weight:bold}
+  .viewbox .where{font-size:26px;font-weight:bold;line-height:1.2;margin:6px 0 4px}
+  .viewbox p{font-size:15px;color:#f2f2e9;margin:6px 0 0}
+  .gobtn{display:inline-block;margin-top:14px;background:var(--gold);color:var(--green-dark);font-weight:bold;font-size:17px;padding:12px 26px;border-radius:999px;text-decoration:none}
+  .gobtn:hover{background:#ffd873}
+  .cta{background:#f4f2e9;border-radius:10px;padding:18px 20px;margin:24px 0}
+  .cta p{margin-bottom:0}
+  .src{font-size:13px;color:var(--muted);border-top:1px dashed var(--line);padding-top:8px;margin-top:14px}
+  footer{border-top:1px solid var(--line);margin-top:40px;padding:22px 20px 34px;color:var(--muted);font-size:14.5px;text-align:center}
+  footer a{color:var(--green);text-decoration:none;font-weight:bold}
+  footer a:hover{text-decoration:underline}
+  footer .fnav a{white-space:nowrap}
+  details.faq{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 18px;margin:10px 0}
+  details.faq summary{font-weight:bold;color:var(--green-dark);cursor:pointer;font-size:17px}
+  details.faq p{margin:10px 0 4px;font-size:16.5px}
+  @media (max-width:480px){h1{font-size:30px}.finding{font-size:19px}body{font-size:17px}.viewbox .where{font-size:23px}}
+
+  nav.sitenav a.navcta{background:var(--gold);color:#003d1a;font-weight:700}
+  nav.sitenav a.navcta:hover{background:#ffd873;color:#003d1a}
+</style>
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="The Lead Lab">
+<meta property="og:title" content="Local SERP Viewer: See Google Results the Way Your Town Sees Them — The Lead Lab">
+<meta property="og:description" content="A free tool from The Lead Lab: enter a town and a search, and open Google&#x27;s results exactly as a customer standing in that town sees them — set with Google&#x27;s own location parameter. A viewer, not a rank tracker.">
+<meta property="og:url" content="https://leadlabhq.com/tools/local-serp-viewer/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Local SERP Viewer: See Google Results the Way Your Town Sees Them — The Lead Lab">
+<meta name="twitter:description" content="A free tool from The Lead Lab: enter a town and a search, and open Google&#x27;s results exactly as a customer standing in that town sees them — set with Google&#x27;s own location parameter. A viewer, not a rank tracker.">
+</head>
+<body>
+
+<header class="sans">
+  <div class="brand">
+    <div class="name"><a href="/">The Lead <span>Lab</span></a></div>
+    <nav class="sitenav" aria-label="Site">
+      <a href="/">Home</a><a href="/news/">News</a><a href="/news/roadside-republic-peach-signs/">Creator Spotlight</a><a href="/tools/">Tools &amp; Resources</a><a href="/about/">About</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <div class="kicker sans">Free tool · See it like they do</div>
+  <h1>Local SERP Viewer</h1>
+  <p class="finding">Google does not show everybody the same page. <strong>A customer across town — or in the next town over — sees a different list than you do.</strong> Enter a town and a search below, and open Google's results the way a customer standing in that town sees them.</p>
+
+  <div class="privacy sans">
+    <p><strong>Honest plumbing:</strong> to find the place you type, this page sends that place name to OpenStreetMap's free Nominatim service — the one lookup this tool can't do locally. Your search words never leave this page until you click the Google link (then they go to Google, like any search). We store nothing; the only thing we count is an anonymous tally that the tool was opened and used: no values, no cookies, nothing that identifies you.</p>
+  </div>
+
+  <div class="tool sans">
+    <div class="field">
+      <label for="place">Town or ZIP</label>
+      <input type="text" id="place" placeholder="Waldorf, MD — or 20601" autocomplete="off">
+      <p class="hint">The place whose Google results you want to see. A town name with its state is most precise; a ZIP works too, though ZIP areas can span several towns.</p>
+    </div>
+    <div class="field">
+      <label for="query">What the customer searches</label>
+      <input type="text" id="query" placeholder="drywall repair near me" autocomplete="off">
+      <p class="hint">Type it the way a customer would — the trade, with "near me" if that's how they'd ask.</p>
+    </div>
+    <button class="runbtn" id="go" type="button">Build my view</button>
+    <p class="status" id="status" aria-live="polite"></p>
+    <div class="choices" id="choices" hidden></div>
+
+    <div class="viewbox" id="viewbox" hidden>
+      <div class="lbl">Your localized Google link</div>
+      <div class="where" id="where"></div>
+      <p>The link below opens on Google, in a new tab, with the search location set to this town. When it loads, scroll to the bottom of Google's page — Google prints the location it used, and it should name this town.</p>
+      <a class="gobtn" id="golink" href="#" target="_blank" rel="noopener">See the results on Google →</a>
+      <p>Results open on Google because Google doesn't allow its results pages to be embedded — what you get there is Google's own page, unfiltered and unedited by us.</p>
+    </div>
+  </div>
+
+  <h2>How it works</h2>
+  <p>When you search Google, it quietly pins the search to where it thinks you are — which is why the plumber you see at the top of your results is rarely the plumber your customer sees at the top of theirs. Google provides a location parameter (called <em>uule</em>, the same one Google Ads uses to target ads to a place) that sets that pin to a named town instead.</p>
+  <p>This tool does three things: it resolves the place you typed to a town and state using OpenStreetMap data, it writes that town into Google's location parameter in Google's own format, and it hands you the finished Google link. The search itself runs on Google, in your browser — we never see, fetch, or store the results.</p>
+  <p>That also means this is a <strong>viewer, not a measurement</strong>. It sets the town; Google still weighs the exact spot inside the town, the time of day, and — if you're signed in — your own history. For the cleanest read, open the link in a private window, and treat what you see as "what a customer in this town is looking at," never as a ranking report.</p>
+
+  <h2>Questions owners ask</h2>
+  <details class="faq">
+    <summary class="sans">What does the Local SERP Viewer do?</summary>
+    <p>It builds a Google search link with the search location set to the town you enter — using Google's own location parameter (called uule, the same one Google Ads uses to target places) — and opens it on Google in a new tab. You see the results page as a customer searching from that town sees it, instead of the results for wherever you happen to be sitting.</p>
+  </details>
+  <details class="faq">
+    <summary class="sans">Is this my ranking?</summary>
+    <p>No. This is a viewer, not a rank tracker and not a measurement. It sets the search location to the town; Google still weighs the exact spot, the time, and — if you are signed in — your history. Two checks an hour apart can differ. Use it to see what a customer in that town is looking at, not as a position report.</p>
+  </details>
+  <details class="faq">
+    <summary class="sans">Why do the results differ from the same search on my phone?</summary>
+    <p>Your phone searches from where you physically are, and Google localizes hard — a search from across town can return a different list. This tool sets the location to the town you name, so you see that town's version. If you are signed in to Google, your own history can still shade what you see; for the cleanest view, open the link in a private window.</p>
+  </details>
+  <details class="faq">
+    <summary class="sans">Is anything I enter sent or stored?</summary>
+    <p>Your search words are never sent by us — they go to Google only when you click the link, like any Google search. The place name you type is sent to OpenStreetMap's free Nominatim service to resolve it to a town and state; that one lookup cannot be done locally. We store nothing, and the only thing we count is an anonymous tally that the tool was opened and used — no values, no cookies, nothing that identifies you.</p>
+  </details>
+  <details class="faq">
+    <summary class="sans">How do I know Google used the location I picked?</summary>
+    <p>Scroll to the bottom of Google's results page. Google prints the location it used for the search there — it should name your town. If it names somewhere else, Google mapped the town to a nearby place in its own directory; try the town name with the state instead of a ZIP, since ZIP areas often span several towns.</p>
+  </details>
+
+  <div class="cta">
+    <p>That page is what Google shows your town. But a growing share of customers never open the list at all — they ask AI, and take the names it gives them. <a href="/check/"><strong>Run the free AI Visibility Check</strong></a> and see whether your name comes up when they ask.</p>
+  </div>
+
+  <p class="src sans">Built by The Lead Lab. Free, no signup. Location data © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap contributors</a>, available under the ODbL. Search results are Google's own. See our other <a href="/tools/">free tools</a>.</p>
+</main>
+
+<footer class="sans">
+  <p><strong>The Lead Lab</strong> — free research and simple tools for local service businesses.</p>
+  <p class="fnav" style="margin-top:8px"><a href="/">Home</a> · <a href="/check/">Free Check</a> · <a href="/research/">Research</a> · <a href="/who-ai-recommends/">Who AI Recommends</a> · <a href="/tools/">Tools</a> · <a href="/toolbox/">Toolbox</a> · <a href="/prompts/">Prompts</a> · <a href="/methodology/">Methodology</a> · <a href="/sample-report/">Sample Report</a> · <a href="/about/">About</a> · <a href="/guidelines/">News Guidelines</a> · <a href="/contact/">Contact</a></p>
+  <p style="margin-top:8px">Get the newsletter: <a href="https://the-lead-lab-newsletter.beehiiv.com">the-lead-lab-newsletter.beehiiv.com</a></p>
+  <p style="margin-top:8px">Research snapshots, not ratings — tool results are estimates. <a href="/disclaimer/">Disclaimer</a></p>
+  <p style="margin-top:10px">Researched and published by The Lead Lab team. © 2026 The Lead Lab.</p>
+</footer>
+
+<script>
+(function(){
+  "use strict";
+  var $ = function(id){ return document.getElementById(id); };
+
+  /* Build Google's uule parameter for a canonical place name.
+     The value is base64 of a small protocol-buffer message —
+     field 1 = 2, field 2 = 32 (producer), field 4 = the canonical
+     name ("Town,State,United States") with its length prefix —
+     prefixed with "w+". Construction verified byte-for-byte against
+     published generator outputs (see QA notes). */
+  function makeUule(canonical){
+    var nameBytes = new TextEncoder().encode(canonical);
+    var pb = [0x08, 0x02, 0x10, 0x20, 0x22, nameBytes.length];
+    var bin = "";
+    for (var j = 0; j < pb.length; j++){ bin += String.fromCharCode(pb[j]); }
+    for (var k = 0; k < nameBytes.length; k++){ bin += String.fromCharCode(nameBytes[k]); }
+    var b64 = btoa(bin).replace(/=+$/, "");
+    return "w+" + b64;
+  }
+
+  function googleUrl(query, canonical){
+    return "https://www.google.com/search?q=" + encodeURIComponent(query) +
+           "&uule=" + makeUule(canonical) + "&hl=en&gl=us";
+  }
+
+  function placeNameOf(r){
+    var a = (r && r.address) || {};
+    if (a.city) return a.city;
+    if (a.town) return a.town;
+    /* A boundary/place result's own name (e.g. "Waldorf") beats a
+       village nested inside it; never use a numeric name (a ZIP). */
+    if (r && r.name && !/^\d+$/.test(r.name) &&
+        (r.category === "place" || r.category === "boundary")) return r.name;
+    return a.village || a.hamlet || a.suburb || "";
+  }
+
+  function candidatesFrom(results){
+    var seen = {}, out = [];
+    (results || []).forEach(function(r){
+      var a = (r && r.address) || {};
+      var place = placeNameOf(r);
+      var state = a.state || "";
+      if (!place || !state) return;
+      var canonical = place + "," + state + ",United States";
+      if (seen[canonical]) return;
+      seen[canonical] = true;
+      out.push({ label: place + ", " + state, canonical: canonical });
+    });
+    return out;
+  }
+
+  function setStatus(msg, isErr){
+    var s = $("status");
+    s.textContent = msg || "";
+    s.className = "status" + (isErr ? " err" : "");
+  }
+
+  function showView(cand, query){
+    $("choices").hidden = true;
+    $("choices").innerHTML = "";
+    $("where").textContent = cand.label;
+    $("golink").href = googleUrl(query, cand.canonical);
+    $("viewbox").hidden = false;
+    setStatus("");
+    $("viewbox").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  function search(q){
+    var url = "https://nominatim.openstreetmap.org/search?format=jsonv2&addressdetails=1&limit=5&countrycodes=us&q=" + encodeURIComponent(q);
+    return fetch(url, { headers: { "Accept": "application/json" } })
+      .then(function(r){ if (!r.ok) throw new Error("lookup"); return r.json(); });
+  }
+
+  function resolvePlace(raw, query){
+    search(raw).then(function(results){
+      var cands = candidatesFrom(results);
+      if (!cands.length && /^\d{5}$/.test(raw)) {
+        return search(raw + ", USA").then(function(r2){
+          finish(candidatesFrom(r2), query, raw);
+        });
+      }
+      finish(cands, query, raw);
+    }).catch(function(){
+      $("go").disabled = false;
+      setStatus("The place lookup didn't answer. Check your connection, or type the town and state in full (for example: Waldorf, Maryland).", true);
+    });
+  }
+
+  function finish(cands, query, raw){
+    $("go").disabled = false;
+    if (!cands.length) {
+      setStatus("We couldn't pin that to a US town. Try the town name with its state — for example: Waldorf, Maryland.", true);
+      return;
+    }
+    if (cands.length === 1) { showView(cands[0], query); return; }
+    var box = $("choices");
+    box.innerHTML = "<p>Which place did you mean?</p>";
+    cands.forEach(function(c){
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "choicebtn";
+      b.textContent = c.label;
+      b.addEventListener("click", function(){ showView(c, query); });
+      box.appendChild(b);
+    });
+    box.hidden = false;
+    setStatus("");
+  }
+
+  $("go").addEventListener("click", function(){
+    var raw = $("place").value.replace(/\s+/g, " ").replace(/^\s+|\s+$/g, "");
+    var query = $("query").value.replace(/^\s+|\s+$/g, "");
+    $("viewbox").hidden = true;
+    $("choices").hidden = true;
+    if (!raw) { setStatus("Enter a town or ZIP first.", true); $("place").focus(); return; }
+    if (!query) { setStatus("Enter the search your customer would type.", true); $("query").focus(); return; }
+    $("go").disabled = true;
+    setStatus("Finding " + raw + "…");
+    resolvePlace(raw, query);
+  });
+
+  [$("place"), $("query")].forEach(function(el){
+    el.addEventListener("keydown", function(e){ if (e.key === "Enter") { e.preventDefault(); $("go").click(); } });
+  });
+})();
+</script>
+
+</body>
+</html>
